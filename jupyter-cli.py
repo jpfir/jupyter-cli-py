@@ -15,7 +15,7 @@ import sys, os.path
 from http.client import HTTPConnection  # Debug mode
 from configparser import ConfigParser
 from tabulate import tabulate
-
+#############################################################################
 def request( method='GET', resource='', params='', headers={} ):
   url=api_url+resource
   headers.update({'accept': 'application/json'})
@@ -32,7 +32,6 @@ def request( method='GET', resource='', params='', headers={} ):
   )
   if (args.verbose) or (args.debug):
     print('Status code: '+str(response.status_code))
-  print(response.status_code)
   if (args.debug) and not response.status_code == 204 :
     print(json.dumps(json.loads(response.text), sort_keys=True, indent=2, separators=(',', ': ')))
   if not response.status_code == 204:
@@ -51,9 +50,12 @@ parser.add_argument('--user',                 action='store',      help='Choose 
 parser.add_argument('--deluser',              action='store',      help='Delete a user (better use --debug)')
 parser.add_argument('--groups',               action='store_true', help='List groups and users in the group')
 parser.add_argument('--group',                action='store',      help='Choose the group')
-parser.add_argument('--usergroup',            action='store',      help='Add the user in a group (better use --debug)', choices=['add', 'del'])
+parser.add_argument('--usergroup',            action='store',      help='Add or remove user in a group (better use --debug)', choices=['add', 'del'])
+parser.add_argument('--usermodify',           action='store_true', help='Modify the user')
 parser.add_argument('--useradmin',            action='store',      help='Add or remove admin for a user', choices=['True', 'False'])
+parser.add_argument('--usernewname',          action='store',      help='Change username')
 parser.add_argument('--services',             action='store_true', help='List services')
+parser.add_argument('--noheaders',            action='store_true', help='No headers in the output')
 parser.add_argument('--debug',                action='store_true', help='Debug information')
 #parser.add_argument('--verbose',              action='store_true', default=True, help='Verbose')
 parser.add_argument('--verbose',              action='store_true', default=False, help='Verbose')
@@ -84,7 +86,10 @@ if (args.users):
         user['kind'],
         user['admin'],
       ]),
-    print(tabulate(sorted(table), tablefmt='rounded_outline', headers=['username','kind','admin']))
+    if args.noheaders:
+      print(tabulate(sorted(table), tablefmt='plain'))
+    else:
+      print(tabulate(sorted(table), tablefmt='rounded_outline', headers=['username','kind','admin']))
 if (args.deluser):
   users=request( method='DELETE', resource='users/'+args.deluser, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' } )
 if (args.groups):
@@ -105,19 +110,27 @@ if (args.usergroup):
     print(userlist)
     print(method)
   groups=request( method=method, resource='groups/'+args.group+'/users', params={ 'users': userlist }, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' } )
-if (args.useradmin):
+if (args.usermodify):
   if not (args.user):
     print('You have to choose a user')
     quit()
-  userlist= args.user
-  if (args.debug):
-    print(userlist)
-    print(args.useradmin)
-  if args.useradmin == "True":
-    admin= True
+  if not (args.useradmin) and not (args.usernewname):
+    print('Choose useradmin and/or nweusername to change!')
   else:
-    admin= False
-  groups=request( method='PATCH', resource='users/'+args.user, params={ 'admin': admin }, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' } )
+    params={}
+    if (args.debug):
+      print(args.user)
+      print(args.useradmin)
+      print(args.usernewname)
+    if args.useradmin == "True":
+      params.__setitem__("admin", True)
+    else:
+      params.__setitem__("admin", False)
+    if args.usernewname:
+      params.__setitem__("name", args.usernewname)
+    if (args.debug):
+      print(params)
+    groups=request( method='PATCH', resource='users/'+args.user, params=params, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' } )
 if (args.services):
   services=request( resource='services', headers={ 'Authorization': 'token '+api_key } )
 #############################################################################

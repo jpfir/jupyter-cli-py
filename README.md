@@ -18,10 +18,14 @@ options:
   --groups              List groups and users in the group (default: False)
   --group GROUP         Choose the group (default: None)
   --usergroup {add,del}
-                        Add the user in a group (better use --debug) (default: None)
+                        Add or remove user in a group (better use --debug) (default: None)
+  --usermodify          Modify the user (default: False)
   --useradmin {True,False}
                         Add or remove admin for a user (default: None)
+  --usernewname USERNEWNAME
+                        Change username (default: None)
   --services            List services (default: False)
+  --noheaders           No headers in the output (default: False)
   --debug               Debug information (default: False)
   --verbose             Verbose (default: False)
 
@@ -37,13 +41,16 @@ options:
 
 ./jupyter-cli.py --users --user username --debug
 
-./jupyter-cli.py --useradmin False --user username --debug
+./jupyter-cli.py --usermodify --user username --useradmin True --debug
+./jupyter-cli.py --usermodify --user username --usernewname newusername --debug
+./jupyter-cli.py --usermodify --user username --useradmin False --usernewname newusername --debug
+
 ./jupyter-cli.py --deluser username --debug
 
-./jupyter-cli.py --usergroup add --user username --group groupname --debug
-./jupyter-cli.py --usergroup del --user username --group groupname --debug
 ./jupyter-cli.py --groups --debug
 ./jupyter-cli.py --groups --group groupname --debug
+./jupyter-cli.py --usergroup add --user username --group groupname --debug
+./jupyter-cli.py --usergroup del --user username --group groupname --debug
 
 ./jupyter-cli.py --services --debug
 ```
