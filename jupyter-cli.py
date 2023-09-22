@@ -47,13 +47,16 @@ parser.add_argument('--version',              action='store_true', help='Version
 parser.add_argument('--info',                 action='store_true', help='Information')
 parser.add_argument('--users',                action='store_true', help='List users')
 parser.add_argument('--user',                 action='store',      help='Choose the user')
+parser.add_argument('--usermodify',           action='store_true', help='Modify the user')
+parser.add_argument('--useradmin',            action='store',      help='Add or remove admin for a user', choices=['True', 'False'])
+parser.add_argument('--tokens',               action='store_true', help='List tokens by user')
+parser.add_argument('--token',                action='store',      help='Display a user token')
 parser.add_argument('--deluser',              action='store',      help='Delete a user (better use --debug)')
 parser.add_argument('--groups',               action='store_true', help='List groups and users in the group')
 parser.add_argument('--group',                action='store',      help='Choose the group')
 parser.add_argument('--usergroup',            action='store',      help='Add or remove user in a group (better use --debug)', choices=['add', 'del'])
-parser.add_argument('--usermodify',           action='store_true', help='Modify the user')
-parser.add_argument('--useradmin',            action='store',      help='Add or remove admin for a user', choices=['True', 'False'])
 parser.add_argument('--usernewname',          action='store',      help='Change username')
+parser.add_argument('--proxy',                action='store_true', help='List proxy')
 parser.add_argument('--services',             action='store_true', help='List services')
 parser.add_argument('--noheaders',            action='store_true', help='No headers in the output')
 parser.add_argument('--debug',                action='store_true', help='Debug information')
@@ -76,7 +79,13 @@ if (args.info):
   info=request( resource='info', headers={ 'Authorization': 'token '+api_key } )
 if (args.users):
   if (args.user):
-   user=request( resource='users/'+args.user, headers={ 'Authorization': 'token '+api_key } )
+    if (args.tokens):
+      if (args.token):
+        token=request( resource='users/'+args.user+'/tokens/'+args.token, headers={ 'Authorization': 'token '+api_key } )
+      else:
+        tokens=request( resource='users/'+args.user+'/tokens', headers={ 'Authorization': 'token '+api_key } )
+    else:
+      user=request( resource='users/'+args.user, headers={ 'Authorization': 'token '+api_key } )
   else:
     users=request( resource='users', headers={ 'Authorization': 'token '+api_key } )
     table = []
@@ -133,6 +142,8 @@ if (args.usermodify):
     groups=request( method='PATCH', resource='users/'+args.user, params=params, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' } )
 if (args.services):
   services=request( resource='services', headers={ 'Authorization': 'token '+api_key } )
+if (args.proxy):
+  services=request( resource='proxy', headers={ 'Authorization': 'token '+api_key } )
 #############################################################################
 #############################################################################
 #############################################################################
