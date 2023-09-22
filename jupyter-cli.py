@@ -16,7 +16,9 @@ from http.client import HTTPConnection  # Debug mode
 from configparser import ConfigParser
 from tabulate import tabulate
 #############################################################################
-def request( method='GET', resource='', params='', headers={} ):
+def request( method='GET', resource='' , auth='', headers={}, params='', data='' ):
+  # data:   POST, PUT, ...
+  # params: GET, ...
   url=api_url+resource
   headers.update({'accept': 'application/json'})
   if (args.verbose) or (args.debug):
@@ -27,8 +29,10 @@ def request( method='GET', resource='', params='', headers={} ):
   response=requests.request(
     method,
     api_url+resource,
+    auth=auth,
     headers=headers,
-    json=params,
+    params=params,
+    data=data
   )
   if (args.verbose) or (args.debug):
     print('Status code: '+str(response.status_code))
@@ -118,7 +122,7 @@ if (args.usergroup):
   if (args.debug):
     print(userlist)
     print(method)
-  groups=request( method=method, resource='groups/'+args.group+'/users', params={ 'users': userlist }, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' } )
+  groups=request( method=method, resource='groups/'+args.group+'/users', headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' }, data=json.dumps({ 'users': userlist }) )
 if (args.usermodify):
   if not (args.user):
     print('You have to choose a user')
@@ -126,20 +130,20 @@ if (args.usermodify):
   if not (args.useradmin) and not (args.usernewname):
     print('Choose useradmin and/or nweusername to change!')
   else:
-    params={}
+    data={}
     if (args.debug):
       print(args.user)
       print(args.useradmin)
       print(args.usernewname)
     if args.useradmin == "True":
-      params.__setitem__("admin", True)
+      data.__setitem__("admin", True)
     else:
-      params.__setitem__("admin", False)
+      data.__setitem__("admin", False)
     if args.usernewname:
-      params.__setitem__("name", args.usernewname)
+      data.__setitem__("name", args.usernewname)
     if (args.debug):
-      print(params)
-    groups=request( method='PATCH', resource='users/'+args.user, params=params, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' } )
+      print(data)
+    groups=request( method='PATCH', resource='users/'+args.user, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' }, data=json.dumps(data) )
 if (args.services):
   services=request( resource='services', headers={ 'Authorization': 'token '+api_key } )
 if (args.proxy):
