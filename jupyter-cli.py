@@ -115,7 +115,7 @@ if (args.usergroup):
     print('You have to choose a group and a user')
     quit()
   userlist= [ args.user ]
-  if args.usergroup == 'del':
+  if (args.usergroup) == 'del':
     method='DELETE'
   else:
     method='POST'
@@ -135,12 +135,15 @@ if (args.usermodify):
       print(args.user)
       print(args.useradmin)
       print(args.usernewname)
-    if args.useradmin == "True":
-      data.__setitem__("admin", True)
+    if (args.useradmin) == 'True':
+      #data['admin']= True
+      data.__setitem__('admin', True)
     else:
-      data.__setitem__("admin", False)
-    if args.usernewname:
-      data.__setitem__("name", args.usernewname)
+      #data['admin']= False
+      data.__setitem__('admin', False)
+    if (args.usernewname):
+      #data['name']= args.usernewname
+      data.__setitem__('name', args.usernewname)
     if (args.debug):
       print(data)
     groups=request( method='PATCH', resource='users/'+args.user, headers={ 'Authorization': 'token '+api_key, 'Content-Type': 'application/json' }, data=json.dumps(data) )
